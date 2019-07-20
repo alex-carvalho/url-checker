@@ -1,0 +1,39 @@
+version: '2.1'
+services:
+  app:
+    build: .
+    environment:
+      INSERTION_QUEUE: insertion.queue
+      VALIDATION_QUEUE: validation.queue
+      NUMBER_OF_VALIDATION_CONSUMERS: 1
+      RESPONSE_EXCHANGE: response.exchange
+      RESPONSE_ROUTING_KEY: response.routing.key
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: 5672
+      RABBITMQ_VHOST: /
+      RABBITMQ_USERNAME: guest
+      RABBITMQ_PASSWORD: guest
+      JDBC_URL: jdbc:mysql://mysql:3306/regexdb?user=root&password=secret
+    links:
+      - mysql:mysql
+      - rabbitmq:rabbitmq
+    depends_on:
+      mysql:
+        condition: service_healthy
+  mysql:
+    image: mysql:5.7
+    environment:
+      MYSQL_DATABASE: regexdb
+      MYSQL_ROOT_PASSWORD: secret
+    ports:
+      - 3306:3306
+    healthcheck:
+      test: mysqladmin ping --password=$$MYSQL_ROOT_PASSWORD
+      interval: 10s
+      timeout: 10s
+      retries: 15
+  rabbitmq:
+    image: rabbitmq:3.6-management
+    ports:
+      - 5672:5672
+      - 15672:15672

@@ -1,0 +1,52 @@
+spring:
+  datasource:
+    url: ${JDBC_URL:jdbc:mysql://localhost:3306/regexdb?user=root&password=secret}
+
+  rabbitmq:
+    host: ${RABBITMQ_HOST:localhost}
+    port: ${RABBITMQ_PORT:5672}
+    virtual-host: ${RABBITMQ_VHOST:/}
+    username: ${RABBITMQ_USERNAME:guest}
+    password: ${RABBITMQ_PASSWORD:guest}
+
+
+amqp:
+  insertion:
+    queue: ${INSERTION_QUEUE:insertion.queue}
+  validation:
+    queue: ${VALIDATION_QUEUE:validation.queue}
+    number-consumers: ${NUMBER_OF_VALIDATION_CONSUMERS:2}
+  response:
+    exchange: ${RESPONSE_EXCHANGE:response.exchange}
+    routing-key: ${RESPONSE_ROUTING_KEY:response.routing.key}
+
+---
+
+spring:
+  profiles: dev
+
+  jpa:
+    properties.hibernate.format_sql: true
+
+logging.level.org.hibernate:
+  SQL: DEBUG
+  type.descriptor.sql.BasicBinder: TRACE
+
+logging.level.org.springframework.jdbc.core:
+  JdbcTemplate: DEBUG
+  StatementCreatorUtils: TRACE
+
+
+---
+
+spring:
+  profiles: test
+
+  datasource:
+    url: jdbc:h2:mem:AZ;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    driverClassName: org.h2.Driver
+    username: sa
+    password:
+
+  rabbitmq:
+    port: 3344
